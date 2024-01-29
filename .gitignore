@@ -2,6 +2,10 @@
 __pycache__/
 *.py[cod]
 *$py.class
+biblio_bs4.py
+biblio_scrapy.py
+test.py
+
 
 # C extensions
 *.so
