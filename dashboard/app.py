@@ -1,20 +1,15 @@
 import dash
 from dash import dcc, html
 from dash.dependencies import Input, Output
-import plotly.express as px
-import pandas as pd
+import plotly.graph_objs as go
 from pymongo import MongoClient
 
 # Connect to MongoDB
 client = MongoClient('mongodb://localhost:27017/')
-db = client['bookstore']
-collection = db['books']
+db = client['Bibliometrics']
 
-# Retrieve data from MongoDB
-data = list(collection.find({}, {'_id': 0}))
-
-# Convert MongoDB data to DataFrame
-df = pd.DataFrame(data)
+# Retrieve collection names from MongoDB and sort them alphabetically
+collection_names = sorted(db.list_collection_names())
 
 # Initialize Dash app
 app = dash.Dash(__name__)
@@ -26,8 +21,9 @@ app.layout = html.Div([
     html.Div([
         dcc.Dropdown(
             id='category-dropdown',
-            options=[{'label': category, 'value': category} for category in df['category'].unique()],
-            value=df['category'].unique()[0]
+            options=[{'label': 'All Categories', 'value': 'all'}] + [{'label': collection_name, 'value': collection_name} for collection_name in collection_names],
+            value=['all'],  # Allow selecting multiple collections
+            multi=True  # Enable multi-select
         )
     ]),
     
@@ -41,15 +37,33 @@ app.layout = html.Div([
     Output('book-count-graph', 'figure'),
     [Input('category-dropdown', 'value')]
 )
-def update_graph(selected_category):
-    filtered_df = df[df['category'] == selected_category]
-    book_count = filtered_df['category'].value_counts().reset_index()
-    book_count.columns = ['category', 'count']
-    fig = px.bar(book_count, x='category', y='count', title=f"Nombre de livres par catégorie ({selected_category})")
-    return fig
+def update_graph(selected_collections):
+    if 'all' in selected_collections:
+        selected_collections = collection_names
+    if selected_collections:
+        data = []
+        for collection_name in selected_collections:
+            collection = db[collection_name]
+            book_count = collection.count_documents({})
+            data.append({'collection': collection_name, 'book_count': book_count})
+        
+        # Sort the data by book count in descending order
+        data = sorted(data, key=lambda x: x['book_count'], reverse=True)
+        
+        # Create a bar chart
+        fig = go.Figure()
+        for d in data:
+            fig.add_trace(go.Bar(x=[d['collection']], y=[d['book_count']], name=d['collection']))
+        
+        fig.update_layout(barmode='group', xaxis_title='Collection', yaxis_title='Book Count',
+                          title="Nombre de livres par collection")
+        
+        fig.update_yaxes(range=[0, 25])
+
+        return fig
+    else:
+        return {}
 
 # Run Dash app
 if __name__ == '__main__':
     app.run_server(debug=True)
-
-print(df.head())
