@@ -11,7 +11,29 @@ app = dash.Dash(__name__)
 # Connect to MongoDB
 client = MongoClient('mongodb://localhost:27017/')
 db = client['Bibliometrics']
-collection = db['Books']
+book_collection = db['Books']
+
+
+print('Récupérer tous les livres avec du stock supérieur à 10')
+only_book_available = book_collection.find({"available_stock": {"$gt": 10}}, {'title': 1, 'price': 1, '_id': 0})
+for books in only_book_available:
+    print(books)
+
+print('Récupérer tous les livres sans stock')
+book_wo_stock = book_collection.find({"available_stock": None}, {'title': 1,'_id': 0})
+for books in book_wo_stock:
+    print(books)
+
+# print("1. Récupérer tous les livres")
+# all_books = book_collection.find({},{'description':0})
+# for zz in all_books:
+#     print(zz)
+
+# for livre in livres_apres_2000:
+#     print(livre)
+# dvds_apres_2005 = book_collection.find({"type": "dvd", "publication_date": {"$gt": datetime(2005, 1, 1)}})
+# livres_fitzgerald = book_collection.find({"type": "book", "authors.name": "Chad Diaz"}, {'title': 1, '_id': 0})
+# 
 
 # Define layout
 app.layout = html.Div([
@@ -43,7 +65,7 @@ app.layout = html.Div([
     [Input('category-dropdown', 'value')]
 )
 def update_dropdown_options(selected_categories):
-    categories = collection.distinct('category')
+    categories = book_collection.distinct('category')
     options = [{'label': 'All categories', 'value': 'all'}]
     options.extend({'label': category, 'value': category} for category in categories)
     return options
@@ -55,9 +77,9 @@ def update_dropdown_options(selected_categories):
 )
 def update_graph(selected_categories):
     if 'all' in selected_categories:  # If "All categories" is selected
-        filtered_data = collection.find({})
+        filtered_data = book_collection.find({})
     else:
-        filtered_data = collection.find({'category': {'$in': selected_categories}})
+        filtered_data = book_collection.find({'category': {'$in': selected_categories}})
     
     df = pd.DataFrame(list(filtered_data))
     book_count = df['category'].value_counts().reset_index()
