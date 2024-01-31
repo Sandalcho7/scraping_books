@@ -4,4 +4,19 @@
 /* Apply Source Sans font to the body text */
 body {
     font-family: 'Source Sans Pro', sans-serif;
+    background-color: rgb(238, 238, 238);
+}
+
+h1 {
+    color: #1E1E1E;
+    font-size: 4em;
+    font-weight: bolder;
+    text-align: center;
+}
+
+.request-div {
+    padding: 50px;
+    margin: 5vh 10vw;
+    border-radius: 20px;
+    box-shadow: 5px 5px 7px rgb(219, 219, 219), -5px -5px 7px rgb(245, 245, 245);
 }
