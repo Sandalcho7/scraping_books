@@ -13,6 +13,7 @@ class MySpider(scrapy.Spider):
         super(MySpider, self).__init__(*args, **kwargs)
         self.client = pymongo.MongoClient("mongodb://localhost:27017/")
         self.db = self.client["Bibliometrics"]
+        self.collection = self.db["Books"]
 
     def parse(self, response):
         # Extract category links
@@ -23,18 +24,33 @@ class MySpider(scrapy.Spider):
             yield scrapy.Request(response.urljoin(category_link), callback=self.parse_category)
 
     def parse_category(self, response):
+        # Extract category name
+        category = response.css('h1::text').get()
+
         # Extract book links
         book_links = response.css('h3 a::attr(href)').extract()
 
         # Follow each book link
         for book_link in book_links:
-            yield scrapy.Request(response.urljoin(book_link), callback=self.parse_book)
+            yield scrapy.Request(response.urljoin(book_link), callback=self.parse_book, meta={'category': category})
+        
+        # Follow pagination links if available
+        next_page = response.css('.next a::attr(href)').extract_first()
+        if next_page:
+            yield scrapy.Request(response.urljoin(next_page), callback=self.parse_category)
 
     def parse_book(self, response):
+        # Extract category from meta
+        category = response.meta['category']
+
         # Extract book details
         title = response.css('h1::text').get()
         price_with_currency = response.css('.price_color::text').get()
         price = float(re.search(r'[\d\.]+', price_with_currency).group())
+
+        # Extracting cover book
+        cover_book_relative = response.css('.thumbnail img::attr(src)').get()
+        cover_book = response.urljoin(cover_book_relative)
 
         # Extracting rating
         rating_class = response.css('.star-rating::attr(class)').get()
@@ -48,16 +64,14 @@ class MySpider(scrapy.Spider):
         description = response.xpath('//div[@id="product_description"]/following-sibling::p/text()').get()
 
         # Insert the scraped data into MongoDB
-        category = response.css('.breadcrumb li:nth-child(3) a::text').get()
-        collection = self.db[category]
-
-        # Insert new data
-        collection.insert_one({
+        self.collection.insert_one({
             "title": title,
             "price": price,
             "rating": rating,
             "available_stock": available_stock,
             "description": description,
+            "category": category,
+            "cover_book": cover_book
         })
 
     def extract_rating(self, rating_class):

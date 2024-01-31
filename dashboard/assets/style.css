@@ -1,0 +1,7 @@
+/* Import Source Sans font from Google Fonts (you can adjust the link if you're using a different source) */
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600&display=swap');
+
+/* Apply Source Sans font to the body text */
+body {
+    font-family: 'Source Sans Pro', sans-serif;
+}
