@@ -1,6 +1,7 @@
 import dash
-from dash import dcc, html
+from dash import dcc, html, dash_table
 from dash.dependencies import Input, Output
+from dash.dash_table import FormatTemplate
 import plotly.express as px
 import pandas as pd
 from pymongo import MongoClient
@@ -14,15 +15,18 @@ db = client['Bibliometrics']
 book_collection = db['Books']
 
 
-print('Récupérer tous les livres avec du stock supérieur à 10')
-only_book_available = book_collection.find({"available_stock": {"$gt": 10}}, {'title': 1, 'price': 1, '_id': 0})
-for books in only_book_available:
-    print(books)
+# 'Récupérer tous les livres avec du stock supérieur à 10'
+def only_book_available(categories_filtered):
+    if 'all' in categories_filtered:
+        available_books = list(book_collection.find({"available_stock": {"$gt": 10}}, {'category':1,'title': 1, 'price': 1, 'rating': 1, '_id': 0}))
+    else:
+        available_books = list(book_collection.find({"available_stock": {"$gt": 10}, "category": {'$in': categories_filtered}}, {'category':1,'title': 1, 'price': 1, 'rating': 1, '_id': 0}))
+    return available_books
 
-print('Récupérer tous les livres sans stock')
-book_wo_stock = book_collection.find({"available_stock": None}, {'title': 1,'_id': 0})
-for books in book_wo_stock:
-    print(books)
+# print('Récupérer tous les livres sans stock')
+# book_wo_stock = book_collection.find({"available_stock": None}, {'title': 1,'_id': 0})
+# for books in book_wo_stock:
+#     print(books)
 
 # print("1. Récupérer tous les livres")
 # all_books = book_collection.find({},{'description':0})
@@ -55,9 +59,31 @@ app.layout = html.Div([
         html.Div([
             dcc.Graph(id='book-count-graph')
         ])
+    ]),
+    html.Div([
+        html.H2("list of books available : more than 10"),
+        html.Div([
+            dcc.Dropdown(
+                id='category-dropdown-table',
+                options=[{'label': 'All categories', 'value': 'all'}],
+                value='all',
+                multi=True
+            )
+        ]),
+        html.Div([
+            dash_table.DataTable(
+                id='table',
+                columns=[{'name': 'category', 'id': 'category'},
+                         {'name': 'Title', 'id': 'title'}, 
+                         {'name': 'Price', 'id': 'price'}, 
+                         {'name': 'Rating', 'id': 'rating'}],
+                data=[]
+              )
+            ])
+        ])
     ])
-    
-])
+
+
 
 # Define callback to update dropdown options dynamically
 @app.callback(
@@ -89,6 +115,27 @@ def update_graph(selected_categories):
     fig = px.bar(book_count, x='category', y='count', color='category', color_discrete_sequence=px.colors.qualitative.Set3)
 
     return fig
+
+# Define callback to update dropdown options dynamically for the table update
+@app.callback(
+    Output('category-dropdown-table', 'options'),
+    [Input('category-dropdown-table', 'value')]
+)
+def update_dropdown_options_table(filtered_categories):
+    categories = book_collection.distinct('category')
+    options = [{'label': 'All categories', 'value': 'all'}]
+    options.extend({'label': category, 'value': category} for category in categories)
+    return options
+
+# Define callback to update graph based on category selection
+@app.callback(
+    Output('table', 'data'),
+    [Input('category-dropdown-table', 'value')]
+)
+def update_table(filtered_categories):
+    data = only_book_available(filtered_categories)
+    return data
+
 
 # Run Dash app
 if __name__ == '__main__':
