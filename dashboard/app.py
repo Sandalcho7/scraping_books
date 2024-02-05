@@ -148,6 +148,52 @@ app.layout = html.Div([
               )
         ])
     ], className='request-div'),
+
+    html.Div([
+        html.H2("10 best priced books with 5 stars rating"),
+        html.Div([
+            dash_table.DataTable(
+                id='table-rating-price',
+                columns=[
+                    {'name': 'Title', 'id': 'title'},
+                    {'name': 'Category', 'id': 'category'},
+                    {'name': 'Price', 'id': 'price'},
+                    {'name': 'Rating', 'id': 'rating'},
+                ],
+                data=[],
+                page_size=20,
+                style_cell={
+                    'whiteSpace': 'nowrap',
+                    'overflow': 'hidden',
+                    'textOverflow': 'ellipsis',
+                    'text-align': 'center',
+                },
+                style_header={'font-weight': 'bold'},
+                style_cell_conditional=[
+                    {
+                        'if': {'column_id': 'title'},
+                        'minWidth': '300px',
+                        'maxWidth': '600px',
+                        'text-align': 'left',
+                        'padding-left': '10px',
+                    },
+                ],  
+              )
+        ])
+    ], className='request-div'),
+
+    html.Div([
+        html.H2("Books count per rating"),
+        html.Div([
+            dcc.Graph(id='rating-pie-chart'),
+        ])
+    ], className='request-div'),
+
+    dcc.Interval(
+        id='interval-component',
+        interval=60000,  # Update every minute (60000 milliseconds)
+        n_intervals=0
+    )
 ])
 
 
@@ -275,6 +321,44 @@ def update_dropdown_options_table_rating(selected_categories):
 def update_table_rating(filtered_categories):
     data = best_rated_books(filtered_categories)
     return data
+
+
+# Callback to update pie chart
+@app.callback(
+    Output('rating-pie-chart', 'figure'),
+    [Input('interval-component', 'n_intervals')]
+)
+def update_pie_chart(selected_categories):
+    books = list(collection.find({}, {'title': 1, 'rating': 1}))
+    
+    rating_counts = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
+    for book in books:
+        rating = book['rating']
+        rating_counts[rating] += 1
+    
+    fig = px.pie(
+        names=[f'Rating {rating}' for rating in rating_counts.keys()],
+        values=list(rating_counts.values()),
+        hole=0.3
+    )
+
+    # Change background color
+    fig.update_layout(
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+    )
+    
+    return fig
+
+
+# Update rating and price 
+@app.callback(
+    Output('table-rating-price', 'data'),
+    [Input('interval-component', 'n_intervals')]
+)
+def update_table_best_price(best_price_and_rating):
+    best_price_and_rating = list(collection.find({"rating": {"$gt": 4}}, {'category': 1, 'title': 1, 'rating': 1,'price':1, '_id': 0}).sort("price", 1).limit(10))
+    return best_price_and_rating
 
 
 
