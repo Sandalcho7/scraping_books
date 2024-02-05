@@ -34,6 +34,7 @@ app.layout = html.Div([
         html.Div([
             dcc.Dropdown(
                 id='category-dropdown-count',
+                className='dropdown',
                 options=[{'label': 'All categories', 'value': 'all'}],
                 value='all',
                 multi=True
@@ -49,6 +50,7 @@ app.layout = html.Div([
         html.Div([
             dcc.Dropdown(
                 id='category-dropdown-rating',
+                className='dropdown',
                 options=[{'label': 'All categories', 'value': 'all'}],
                 value='all',
                 multi=True
@@ -60,10 +62,11 @@ app.layout = html.Div([
     ], className='request-div'),
 
     html.Div([
-        html.H2("list of books available : more than 10"),
+        html.H2("List of books with more than 10 available"),
         html.Div([
             dcc.Dropdown(
                 id='category-dropdown-table',
+                className='dropdown',
                 options=[{'label': 'All categories', 'value': 'all'}],
                 value='all',
                 multi=True
@@ -72,12 +75,31 @@ app.layout = html.Div([
         html.Div([
             dash_table.DataTable(
                 id='table',
-                columns=[{'name': 'category', 'id': 'category'},
-                         {'name': 'Title', 'id': 'title'}, 
-                         {'name': 'Price', 'id': 'price'}, 
-                         {'name': 'Rating', 'id': 'rating'}],
-                data=[]
-              )
+                columns=[
+                    {'name': 'Title', 'id': 'title'},
+                    {'name': 'Category', 'id': 'category'},
+                    {'name': 'Price', 'id': 'price'}, 
+                    {'name': 'Rating', 'id': 'rating'}
+                ],
+                data=[],
+                page_size=20,
+                style_cell={
+                    'whiteSpace': 'nowrap',
+                    'overflow': 'hidden',
+                    'textOverflow': 'ellipsis',
+                    'text-align': 'center',
+                },
+                style_header={'font-weight': 'bold'},
+                style_cell_conditional=[
+                    {
+                        'if': {'column_id': 'title'},  # Targeting the 'Title' column
+                        'minWidth': '300px',
+                        'maxWidth': '600px',
+                        'text-align': 'left',
+                        'padding-left': '10px',
+                    },
+                ],
+            ),
         ])
     ], className='request-div'),
     
@@ -124,6 +146,7 @@ def update_count_graph(selected_categories):
 
     return fig
 
+
 # Dropdown for books rating
 @app.callback(
     Output('category-dropdown-rating', 'options'),
@@ -166,7 +189,8 @@ def update_rating_graph(selected_categories):
 
     return fig
 
-# Dropdown
+
+# Dropdown for table
 @app.callback(
     Output('category-dropdown-table', 'options'),
     [Input('category-dropdown-table', 'value')]
@@ -177,7 +201,7 @@ def update_dropdown_options_table(filtered_categories):
     options.extend({'label': category, 'value': category} for category in categories)
     return options
 
-# Define callback to update graph based on category selection
+# Update table based on category selection
 @app.callback(
     Output('table', 'data'),
     [Input('category-dropdown-table', 'value')]
@@ -185,6 +209,7 @@ def update_dropdown_options_table(filtered_categories):
 def update_table(filtered_categories):
     data = only_book_available(filtered_categories)
     return data
+
 
 
 # Run Dash app
