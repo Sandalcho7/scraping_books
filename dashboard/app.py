@@ -27,6 +27,10 @@ def best_rated_books(categories_filtered):
         available_books = list(collection.find({"rating": {"$gt": 4}, "category": {'$in': categories_filtered}}, {'category':1,'title': 1,'rating': 1, '_id': 0}))
     return available_books
 
+def find_description_books(search_input):
+    specific_description_books = list(collection.find({"title": {"$regex": ".*{}.*".format(search_input)}}, {'category':1,'title': 1, 'rating': 1, '_id': 0}))
+    return specific_description_books
+
 # Define layout
 app.layout = html.Div([
 
@@ -186,6 +190,45 @@ app.layout = html.Div([
         html.H2("Books count per rating"),
         html.Div([
             dcc.Graph(id='rating-pie-chart'),
+        ])
+    ], className='request-div'),
+
+html.Div([
+        html.H2("Search for books with specific words in title"),
+        html.Div([
+             dcc.Input(
+                 id='search-text', 
+                 type='text', 
+                 placeholder='Enter text...'),
+                ]),
+        html.Div([
+            dash_table.DataTable(
+                id='table-description-found-text',
+                columns=[
+                    {'name': 'Title', 'id': 'title'},
+                    {'name': 'Category', 'id': 'category'},
+                    {'name': 'Price', 'id': 'price'},
+                    {'name': 'Rating', 'id': 'rating'},
+                ],
+                data=[],
+                page_size=20,
+                style_cell={
+                    'whiteSpace': 'nowrap',
+                    'overflow': 'hidden',
+                    'textOverflow': 'ellipsis',
+                    'text-align': 'center',
+                },
+                style_header={'font-weight': 'bold'},
+                style_cell_conditional=[
+                    {
+                        'if': {'column_id': 'title'},
+                        'minWidth': '300px',
+                        'maxWidth': '600px',
+                        'text-align': 'left',
+                        'padding-left': '10px',
+                    },
+                ],  
+              )
         ])
     ], className='request-div'),
 
@@ -360,6 +403,22 @@ def update_table_best_price(best_price_and_rating):
     best_price_and_rating = list(collection.find({"rating": {"$gt": 4}}, {'category': 1, 'title': 1, 'rating': 1,'price':1, '_id': 0}).sort("price", 1).limit(10))
     return best_price_and_rating
 
+# call back of the input text
+@app.callback(
+    Output('search-text', 'value'),
+    [Input('search-text', 'question')]
+)
+def update_search_text_value(question):
+    return question
+
+# call back to update the table with the search-text updated
+@app.callback(
+    Output('table-description-found-text', 'data'),
+    [Input('search-text', 'value')]
+)
+def update_table_found_text(search_text):
+    data = find_description_books(search_text)
+    return data
 
 
 # Run Dash app
