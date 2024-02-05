@@ -22,9 +22,9 @@ def only_book_available(categories_filtered):
 
 def best_rated_books(categories_filtered):
     if 'all' in categories_filtered:
-        available_books = list(collection.find({"rating": {"$gt": 1}}, {'category':1,'title': 1, 'rating': 1, '_id': 0}))
+        available_books = list(collection.find({"rating": {"$gt": 4}}, {'category':1,'title': 1, 'rating': 1, '_id': 0}))
     else:
-        available_books = list(collection.find({"rating": {"$gt": 1}, "category": {'$in': categories_filtered}}, {'category':1,'title': 1,'rating': 1, '_id': 0}))
+        available_books = list(collection.find({"rating": {"$gt": 4}, "category": {'$in': categories_filtered}}, {'category':1,'title': 1,'rating': 1, '_id': 0}))
     return available_books
 
 # Define layout
@@ -109,10 +109,11 @@ app.layout = html.Div([
     ], className='request-div'),
     
     html.Div([
-        html.H2("list of books best rating more than 5"),
+        html.H2("List of books with a 5 stars rating"),
         html.Div([
             dcc.Dropdown(
                 id='category-dropdown-table-rating',
+                className='dropdown',
                 options=[{'label': 'All categories', 'value': 'all'}],
                 value='all',
                 multi=True
@@ -121,10 +122,29 @@ app.layout = html.Div([
         html.Div([
             dash_table.DataTable(
                 id='table-rating',
-                columns=[{'name': 'category', 'id': 'category'},
-                         {'name': 'Title', 'id': 'title'},                          
-                         {'name': 'Rating', 'id': 'rating'}],
-                data=[],                
+                columns=[
+                    {'name': 'Title', 'id': 'title'},
+                    {'name': 'Category', 'id': 'category'},
+                    {'name': 'Rating', 'id': 'rating'}
+                ],
+                data=[],
+                page_size=20,
+                style_cell={
+                    'whiteSpace': 'nowrap',
+                    'overflow': 'hidden',
+                    'textOverflow': 'ellipsis',
+                    'text-align': 'center',
+                },
+                style_header={'font-weight': 'bold'},
+                style_cell_conditional=[
+                    {
+                        'if': {'column_id': 'title'},
+                        'minWidth': '300px',
+                        'maxWidth': '600px',
+                        'text-align': 'left',
+                        'padding-left': '10px',
+                    },
+                ],  
               )
         ])
     ], className='request-div'),
@@ -214,8 +234,8 @@ def update_rating_graph(selected_categories):
 
     return fig
 
-# Create the available books dashboard
-# Dropdown for table
+
+# Dropdown for available books table
 @app.callback(
     Output('category-dropdown-table', 'options'),
     [Input('category-dropdown-table', 'value')]
@@ -225,39 +245,37 @@ def update_dropdown_options_table(filtered_categories):
     options = [{'label': 'All categories', 'value': 'all'}]
     options.extend({'label': category, 'value': category} for category in categories)
     return options
-  
-# Define callback to update table based on category selection
-# Update table based on category selection
 
+# Update stock table based on category selection
 @app.callback(
     Output('table', 'data'),
     [Input('category-dropdown-table', 'value')]
 )
-
 def update_table(filtered_categories):
     data = only_book_available(filtered_categories)
     return data
 
+
+# Dropdown for best rated books table
 @app.callback(
     Output('category-dropdown-table-rating', 'options'),
     [Input('category-dropdown-table-rating', 'value')]
 )
-
 def update_dropdown_options_table_rating(selected_categories):
     categories = collection.distinct('category')
     options = [{'label': 'All categories', 'value': 'all'}]
     options.extend({'label': category, 'value': category} for category in categories)
     return options
 
-# Define callback to update table based on category selection
+# Update rating table based on category selection
 @app.callback(
     Output('table-rating', 'data'),
     [Input('category-dropdown-table-rating', 'value')]
 )
-
 def update_table_rating(filtered_categories):
     data = best_rated_books(filtered_categories)
     return data
+
 
 
 # Run Dash app
