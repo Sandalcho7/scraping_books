@@ -46,9 +46,9 @@ def search_in_book_title(search_input):
 
 app.layout = html.Div([
 
-    html.H1("BIBLIOMETRIC'S DASHBOARD"),
-
-    html.Hr(),
+    html.Div([
+        html.H1("BIBLIOMETRIC'S DASHBOARD"),
+    ], className='header'),
     
     html.Div([
         html.H2("Number of books in each category"),
@@ -256,7 +256,7 @@ app.layout = html.Div([
 # Callbacks
 # ---------
 
-# Books count fropdown
+# Books count dropdown
 @app.callback(
     Output('category-dropdown-count', 'options'),
     [Input('category-dropdown-count', 'value')]
@@ -274,6 +274,8 @@ def update_dropdown_options_count(selected_categories):
 )
 def update_count_graph(selected_categories):
     if 'all' in selected_categories:
+        filtered_data = collection.find({})
+    elif not selected_categories:
         filtered_data = collection.find({})
     else:
         filtered_data = collection.find({'category': {'$in': selected_categories}})
@@ -315,6 +317,8 @@ def update_dropdown_options_rating(selected_categories):
 )
 def update_rating_graph(selected_categories):
     if 'all' in selected_categories:
+        filtered_data = collection.find({})
+    elif not selected_categories:
         filtered_data = collection.find({})
     else:
         filtered_data = collection.find({'category': {'$in': selected_categories}})
