@@ -24,3 +24,7 @@ h1 {
 .dropdown {
     margin-bottom: 10px;
 }
+
+#table-rating-price img {
+    width: 70px;
+}
