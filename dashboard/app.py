@@ -4,6 +4,7 @@ from dash.dependencies import Input, Output
 import plotly.express as px
 import pandas as pd
 from pymongo import MongoClient
+import re
 
 # Initialize Dash app
 app = dash.Dash(__name__)
@@ -35,8 +36,15 @@ def best_rated_books(categories_filtered):
 
 # Returns the books that contains an input in their title
 def search_in_book_title(search_input):
-    regex_pattern = ".*" + ".*".join(search_input) + ".*"
-    books_list = list(collection.find({"title": {"$regex": regex_pattern}}, {'category': 1, 'title': 1, 'rating': 1, '_id': 0}))
+    # Split the search input into individual words
+    search_words = search_input.split()
+    
+    # Construct a regular expression pattern to match each word separately
+    regex_pattern = r"(?=.*{})".format(")(?=.*".join(map(re.escape, search_words)))
+    
+    # Perform the search using the constructed regular expression pattern
+    books_list = list(collection.find({"title": {"$regex": regex_pattern, "$options": "i"}}, {'category': 1, 'title': 1, 'rating': 1, 'price': 1, '_id': 0}))
+    
     return books_list
 
 
