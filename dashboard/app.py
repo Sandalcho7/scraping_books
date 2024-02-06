@@ -13,25 +13,37 @@ client = MongoClient('mongodb://localhost:27017/')
 db = client['Bibliometrics']
 collection = db['Books']
 
+
+# Functions
+# ---------
+
+# Returns the books with more than 10 in stock
 def only_book_available(categories_filtered):
     if 'all' in categories_filtered:
-        available_books = list(collection.find({"available_stock": {"$gt": 10}}, {'category':1,'title': 1, 'price': 1, 'rating': 1, '_id': 0}))
+        books_list = list(collection.find({"available_stock": {"$gt": 10}}, {'category':1,'title': 1, 'price': 1, 'rating': 1, '_id': 0}))
     else:
-        available_books = list(collection.find({"available_stock": {"$gt": 10}, "category": {'$in': categories_filtered}}, {'category':1,'title': 1, 'price': 1, 'rating': 1, '_id': 0}))
-    return available_books
+        books_list = list(collection.find({"available_stock": {"$gt": 10}, "category": {'$in': categories_filtered}}, {'category':1,'title': 1, 'price': 1, 'rating': 1, '_id': 0}))
+    return books_list
 
+# Returns the books rated above 4 out of 5
 def best_rated_books(categories_filtered):
     if 'all' in categories_filtered:
-        available_books = list(collection.find({"rating": {"$gt": 4}}, {'category':1,'title': 1, 'rating': 1, '_id': 0}))
+        books_list = list(collection.find({"rating": {"$gt": 4}}, {'category':1,'title': 1, 'rating': 1, '_id': 0}))
     else:
-        available_books = list(collection.find({"rating": {"$gt": 4}, "category": {'$in': categories_filtered}}, {'category':1,'title': 1,'rating': 1, '_id': 0}))
-    return available_books
+        books_list = list(collection.find({"rating": {"$gt": 4}, "category": {'$in': categories_filtered}}, {'category':1,'title': 1,'rating': 1, '_id': 0}))
+    return books_list
 
-def find_description_books(search_input):
-    specific_description_books = list(collection.find({"title": {"$regex": ".*{}.*".format(search_input)}}, {'category':1,'title': 1, 'rating': 1, '_id': 0}))
-    return specific_description_books
+# Returns the books that contains an input in their title
+def search_in_book_title(search_input):
+    regex_pattern = ".*" + ".*".join(search_input) + ".*"
+    books_list = list(collection.find({"title": {"$regex": regex_pattern}}, {'category': 1, 'title': 1, 'rating': 1, '_id': 0}))
+    return books_list
 
-# Define layout
+
+
+# Layout
+# ------
+
 app.layout = html.Div([
 
     html.H1("BIBLIOMETRIC'S DASHBOARD"),
@@ -193,8 +205,8 @@ app.layout = html.Div([
         ])
     ], className='request-div'),
 
-html.Div([
-        html.H2("Search for books with specific words in title"),
+    html.Div([
+        html.H2("Search in title"),
         html.Div([
              dcc.Input(
                  id='search-text', 
@@ -228,7 +240,7 @@ html.Div([
                         'padding-left': '10px',
                     },
                 ],  
-              )
+            )
         ])
     ], className='request-div'),
 
@@ -240,7 +252,11 @@ html.Div([
 ])
 
 
-# Dropdown for books count
+
+# Callbacks
+# ---------
+
+# Books count fropdown
 @app.callback(
     Output('category-dropdown-count', 'options'),
     [Input('category-dropdown-count', 'value')]
@@ -251,7 +267,7 @@ def update_dropdown_options_count(selected_categories):
     options.extend({'label': category, 'value': category} for category in categories)
     return options
 
-# Update graph based on category selection for book count
+# Books count graph
 @app.callback(
     Output('book-count-graph', 'figure'),
     [Input('category-dropdown-count', 'value')]
@@ -281,7 +297,7 @@ def update_count_graph(selected_categories):
     return fig
 
 
-# Dropdown for books rating
+# Books rating dropdown
 @app.callback(
     Output('category-dropdown-rating', 'options'),
     [Input('category-dropdown-rating', 'value')]
@@ -292,7 +308,7 @@ def update_dropdown_options_rating(selected_categories):
     options.extend({'label': category, 'value': category} for category in categories)
     return options
 
-# Update graph based on category selection for book count
+# Books rating graph
 @app.callback(
     Output('book-rating-graph', 'figure'),
     [Input('category-dropdown-rating', 'value')]
@@ -324,7 +340,7 @@ def update_rating_graph(selected_categories):
     return fig
 
 
-# Dropdown for available books table
+# Available books dropdown
 @app.callback(
     Output('category-dropdown-table', 'options'),
     [Input('category-dropdown-table', 'value')]
@@ -335,7 +351,7 @@ def update_dropdown_options_table(filtered_categories):
     options.extend({'label': category, 'value': category} for category in categories)
     return options
 
-# Update stock table based on category selection
+# Available books table
 @app.callback(
     Output('table', 'data'),
     [Input('category-dropdown-table', 'value')]
@@ -345,7 +361,7 @@ def update_table(filtered_categories):
     return data
 
 
-# Dropdown for best rated books table
+# Best rated books dropdown
 @app.callback(
     Output('category-dropdown-table-rating', 'options'),
     [Input('category-dropdown-table-rating', 'value')]
@@ -356,7 +372,7 @@ def update_dropdown_options_table_rating(selected_categories):
     options.extend({'label': category, 'value': category} for category in categories)
     return options
 
-# Update rating table based on category selection
+# Best rated books table
 @app.callback(
     Output('table-rating', 'data'),
     [Input('category-dropdown-table-rating', 'value')]
@@ -366,7 +382,7 @@ def update_table_rating(filtered_categories):
     return data
 
 
-# Callback to update pie chart
+# Books rating pie chart
 @app.callback(
     Output('rating-pie-chart', 'figure'),
     [Input('interval-component', 'n_intervals')]
@@ -394,7 +410,7 @@ def update_pie_chart(selected_categories):
     return fig
 
 
-# Update rating and price 
+# Best rating and price table
 @app.callback(
     Output('table-rating-price', 'data'),
     [Input('interval-component', 'n_intervals')]
@@ -403,22 +419,27 @@ def update_table_best_price(best_price_and_rating):
     best_price_and_rating = list(collection.find({"rating": {"$gt": 4}}, {'category': 1, 'title': 1, 'rating': 1,'price':1, '_id': 0}).sort("price", 1).limit(10))
     return best_price_and_rating
 
-# call back of the input text
+
+# Title search input
 @app.callback(
     Output('search-text', 'value'),
-    [Input('search-text', 'question')]
+    [Input('search-text', 'value')]
 )
-def update_search_text_value(question):
-    return question
+def update_search_text_value(search_text):
+    return search_text
 
-# call back to update the table with the search-text updated
+# Title search table
 @app.callback(
     Output('table-description-found-text', 'data'),
     [Input('search-text', 'value')]
 )
 def update_table_found_text(search_text):
-    data = find_description_books(search_text)
-    return data
+    if search_text:
+        data = search_in_book_title(search_text)
+        return data
+    else:
+        return []
+
 
 
 # Run Dash app
