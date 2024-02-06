@@ -179,6 +179,7 @@ app.layout = html.Div([
             dash_table.DataTable(
                 id='table-rating-price',
                 columns=[
+                    {'name': 'Cover', 'id': 'cover_book', 'type' : 'text', 'presentation': 'markdown'},
                     {'name': 'Title', 'id': 'title'},
                     {'name': 'Category', 'id': 'category'},
                     {'name': 'Price', 'id': 'price'},
@@ -201,8 +202,8 @@ app.layout = html.Div([
                         'text-align': 'left',
                         'padding-left': '10px',
                     },
-                ],  
-              )
+                ], 
+            )
         ])
     ], className='request-div'),
 
@@ -428,7 +429,10 @@ def update_pie_chart(selected_categories):
     [Input('interval-component', 'n_intervals')]
 )
 def update_table_best_price(best_price_and_rating):
-    best_price_and_rating = list(collection.find({"rating": {"$gt": 4}}, {'category': 1, 'title': 1, 'rating': 1,'price':1, '_id': 0}).sort("price", 1).limit(10))
+    best_price_and_rating = list(collection.find({"rating": {"$gt": 4}}, {'category': 1, 'title': 1, 'rating': 1,'price':1, 'cover_book': 1, '_id': 0}).sort("price", 1).limit(10))
+    for e in best_price_and_rating:
+        e['cover_book'] = f"![image]({e['cover_book']})"
+    
     return best_price_and_rating
 
 
