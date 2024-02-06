@@ -5,6 +5,8 @@ import plotly.express as px
 import pandas as pd
 from pymongo import MongoClient
 import re
+from transformers import MarianMTModel, MarianTokenizer
+
 
 # Initialize Dash app
 app = dash.Dash(__name__)
@@ -456,7 +458,21 @@ def update_table_found_text(search_text):
     else:
         return []
 
+def translate_description(description, target_language='fr'):
+    inputs = translation_tokenizer(description, return_tensors="pt", truncation=True, padding=True)
+    translated = translation_model.generate(**inputs, max_length=128, num_beams=4, early_stopping=True)
+    translated_text = translation_tokenizer.batch_decode(translated, skip_special_tokens=True)
+    return translated_text
 
+# Load translation model and tokenizer
+translation_model_name = "Helsinki-NLP/opus-mt-en-fr"
+translation_model = MarianMTModel.from_pretrained(translation_model_name)
+translation_tokenizer = MarianTokenizer.from_pretrained(translation_model_name)
+
+
+description = "This is the description of the book in English."
+translated_description = translate_description(description)
+print(translated_description)
 
 # Run Dash app
 if __name__ == '__main__':
