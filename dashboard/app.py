@@ -492,13 +492,14 @@ def update_random_book_info(n_clicks):
         book = get_random_book()
         # translated_description = translate_description(book['description'])
         return html.Div([
-            html.Img(src=book["cover_book"], alt="Cover Image"),
-            html.Div([
-                html.H3(book["title"]),
-                html.P(f"{book['description']}"),
-                # html.P(f"Description: {translated_description}")
-            ], className='random-book-desc')
-        ], className='random-book-container')
+                    html.Img(src=book["cover_book"], alt="Cover Image"),
+                    html.Div([
+                        html.H3(book["title"]),
+                        html.H4('Category: ' + book["category"]),
+                        html.P(f"{book['description']}"),
+                        # html.P(f"Description: {translated_description}")
+                    ], className='random-book-desc')
+                ], className='random-book-container')
         
 
 
