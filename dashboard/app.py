@@ -6,6 +6,7 @@ import pandas as pd
 from pymongo import MongoClient
 import re
 from transformers import MarianMTModel, MarianTokenizer
+import random
 
 
 # Initialize Dash app
@@ -49,6 +50,10 @@ def search_in_book_title(search_input):
     
     return books_list
 
+def get_random_book():
+    # Replace this with your database query to fetch a random book
+    random_book = collection.aggregate([{ "$sample": { "size": 1 }}])
+    return list(random_book)[0]
 
 
 # Layout
@@ -134,6 +139,21 @@ app.layout = html.Div([
         ])
     ], className='request-div'),
     
+    # Random Book Generator
+    html.Div([
+        html.H2("Random Book Generator"),
+        html.Div([
+            html.Button("Generate Random Book", id="random-book-button"),
+            html.Div(id="random-book-output"),
+            # Add the cover book here
+            dash_table.DataTable(
+                id='table-cover-book',
+                # columns=[{'name': 'Cover', 'id': 'cover_book', 'type' : 'text', 'presentation': 'markdown'}],
+                data=[],
+            )
+        ], className='random-book-generator'),
+    ], className='request-div'),
+
     html.Div([
         html.H2("List of books with a 5 stars rating"),
         html.Div([
@@ -250,9 +270,13 @@ app.layout = html.Div([
                         'text-align': 'left',
                         'padding-left': '10px',
                     },
-                ],  
+                ], 
+                 
             )
+            
+            
         ])
+        
     ], className='request-div'),
 
     dcc.Interval(
@@ -458,21 +482,35 @@ def update_table_found_text(search_text):
     else:
         return []
 
-def translate_description(description, target_language='fr'):
-    inputs = translation_tokenizer(description, return_tensors="pt", truncation=True, padding=True)
-    translated = translation_model.generate(**inputs, max_length=128, num_beams=4, early_stopping=True)
-    translated_text = translation_tokenizer.batch_decode(translated, skip_special_tokens=True)
-    return translated_text
+# Define callback to update random book information
+@app.callback(
+    Output("random-book-output", "children"),
+    [Input("random-book-button", "n_clicks")]
+)
+def update_random_book_info(n_clicks):
+    if n_clicks:
+        book = get_random_book()
+        # translated_description = translate_description(book['description'])
+        return html.Div([
+            html.H2(book["title"]),
+            html.Img(src=book["cover_book"], alt="Cover Image"),
+            html.P(f"Original Description: {book['description']}"),
+            # html.P(f"Description: {translated_description}")
+        ])
+        
 
-# Load translation model and tokenizer
-translation_model_name = "Helsinki-NLP/opus-mt-en-fr"
-translation_model = MarianMTModel.from_pretrained(translation_model_name)
-translation_tokenizer = MarianTokenizer.from_pretrained(translation_model_name)
 
+# def translate_description(description, target_language='fr'):
+#     inputs = translation_tokenizer(description, return_tensors="pt", truncation=True, padding=True)
+#     translated = translation_model.generate(**inputs, max_length=128, num_beams=4, early_stopping=True)
+#     translated_text = translation_tokenizer.batch_decode(translated, skip_special_tokens=True)
+#     translated_description = translated_text[0]  # Accéder au premier élément de la liste
+#     return translated_description
 
-description = "This is the description of the book in English."
-translated_description = translate_description(description)
-print(translated_description)
+# # Load translation model and tokenizer
+# translation_model_name = "Helsinki-NLP/opus-mt-en-fr"
+# translation_model = MarianMTModel.from_pretrained(translation_model_name)
+# translation_tokenizer = MarianTokenizer.from_pretrained(translation_model_name)
 
 # Run Dash app
 if __name__ == '__main__':
