@@ -21,6 +21,10 @@ h1 {
     text-align: center;
 }
 
+h3 {
+    margin-top: 0;
+}
+
 .request-div {
     padding: 50px;
     margin: 5vh 10vw;
@@ -40,4 +44,34 @@ h1 {
 .dash-table-container .dash-spreadsheet-container .dash-spreadsheet-inner td div.dash-cell-value.cell-markdown, .dash-table-container .dash-spreadsheet-container .dash-spreadsheet-inner th div.dash-cell-value.cell-markdown
 {
   text-align: center !important;
+}
+
+.generate-title {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+#random-book-button {
+    margin-left: 20px;
+    height: 30px;
+}
+
+.random-book-container {
+    display: flex;
+    flex-direction: row;
+}
+
+.random-book-desc {
+    margin-left: 20px;
+    text-align: justify;
+}
+
+.random-book-container img {
+    border-radius: 10px;
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
 }
