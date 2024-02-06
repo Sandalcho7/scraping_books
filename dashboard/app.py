@@ -13,6 +13,7 @@ client = MongoClient('mongodb://localhost:27017/')
 db = client['Bibliometrics']
 collection = db['Books']
 
+
 def only_book_available(categories_filtered):
     if 'all' in categories_filtered:
         available_books = list(collection.find({"available_stock": {"$gt": 10}}, {'category':1,'title': 1, 'price': 1, 'rating': 1, '_id': 0}))
@@ -34,7 +35,7 @@ def find_description_books(search_input):
 # Define layout
 app.layout = html.Div([
 
-    html.H1("BIBLIOMETRIC'S DASHBOARD"),
+    html.H1("BIBLIOMETRIC'S DASHBOARD 📚 "),
 
     html.Hr(),
     
@@ -88,7 +89,7 @@ app.layout = html.Div([
                     {'name': 'Title', 'id': 'title'},
                     {'name': 'Category', 'id': 'category'},
                     {'name': 'Price', 'id': 'price'}, 
-                    {'name': 'Rating', 'id': 'rating'}
+                    {'name': 'Rating', 'id': 'rating'}                    
                 ],
                 data=[],
                 page_size=20,
@@ -159,6 +160,7 @@ app.layout = html.Div([
             dash_table.DataTable(
                 id='table-rating-price',
                 columns=[
+                    {'name': 'Cover_book', 'id': 'cover_book', 'type' : 'text', 'presentation': 'markdown'},
                     {'name': 'Title', 'id': 'title'},
                     {'name': 'Category', 'id': 'category'},
                     {'name': 'Price', 'id': 'price'},
@@ -181,8 +183,8 @@ app.layout = html.Div([
                         'text-align': 'left',
                         'padding-left': '10px',
                     },
-                ],  
-              )
+                ], 
+            )
         ])
     ], className='request-div'),
 
@@ -259,6 +261,9 @@ def update_dropdown_options_count(selected_categories):
 def update_count_graph(selected_categories):
     if 'all' in selected_categories:
         filtered_data = collection.find({})
+    elif not selected_categories:
+        # If no categories are selected, fetch data for all categories
+        filtered_data = collection.find({})
     else:
         filtered_data = collection.find({'category': {'$in': selected_categories}})
     
@@ -299,6 +304,9 @@ def update_dropdown_options_rating(selected_categories):
 )
 def update_rating_graph(selected_categories):
     if 'all' in selected_categories:
+        filtered_data = collection.find({})
+    elif not selected_categories:
+        # If no categories are selected, fetch data for all categories
         filtered_data = collection.find({})
     else:
         filtered_data = collection.find({'category': {'$in': selected_categories}})
@@ -400,7 +408,10 @@ def update_pie_chart(selected_categories):
     [Input('interval-component', 'n_intervals')]
 )
 def update_table_best_price(best_price_and_rating):
-    best_price_and_rating = list(collection.find({"rating": {"$gt": 4}}, {'category': 1, 'title': 1, 'rating': 1,'price':1, '_id': 0}).sort("price", 1).limit(10))
+    best_price_and_rating = list(collection.find({"rating": {"$gt": 4}}, {'category': 1, 'title': 1, 'rating': 1,'price':1, 'cover_book': 1, '_id': 0}).sort("price", 1).limit(10))
+    for e in best_price_and_rating:
+        e['cover_book'] = f"![image]({e['cover_book']})"
+    
     return best_price_and_rating
 
 # call back of the input text
