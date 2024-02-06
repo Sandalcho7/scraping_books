@@ -5,7 +5,6 @@ import plotly.express as px
 import pandas as pd
 from pymongo import MongoClient
 import re
-from transformers import MarianMTModel, MarianTokenizer
 import random
 
 
@@ -139,18 +138,18 @@ app.layout = html.Div([
         ])
     ], className='request-div'),
     
-    # Random Book Generator
     html.Div([
-        html.H2("Random Book Generator"),
         html.Div([
+            html.H2("🎲 Random Book Generator"),
             html.Button("Generate Random Book", id="random-book-button"),
+        ], className='generate-title'),
+        html.Div([
             html.Div(id="random-book-output"),
-            # Add the cover book here
-            dash_table.DataTable(
-                id='table-cover-book',
-                # columns=[{'name': 'Cover', 'id': 'cover_book', 'type' : 'text', 'presentation': 'markdown'}],
-                data=[],
-            )
+            # dash_table.DataTable(
+            #     id='table-cover-book',
+            #     columns=[{'name': 'Cover', 'id': 'cover_book', 'type' : 'text', 'presentation': 'markdown'}],
+            #     data=[],
+            # )
         ], className='random-book-generator'),
     ], className='request-div'),
 
@@ -482,6 +481,7 @@ def update_table_found_text(search_text):
     else:
         return []
 
+
 # Define callback to update random book information
 @app.callback(
     Output("random-book-output", "children"),
@@ -492,11 +492,13 @@ def update_random_book_info(n_clicks):
         book = get_random_book()
         # translated_description = translate_description(book['description'])
         return html.Div([
-            html.H2(book["title"]),
             html.Img(src=book["cover_book"], alt="Cover Image"),
-            html.P(f"Original Description: {book['description']}"),
-            # html.P(f"Description: {translated_description}")
-        ])
+            html.Div([
+                html.H3(book["title"]),
+                html.P(f"{book['description']}"),
+                # html.P(f"Description: {translated_description}")
+            ], className='random-book-desc')
+        ], className='random-book-container')
         
 
 
