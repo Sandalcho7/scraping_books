@@ -9,8 +9,11 @@ First steps is scrapping and second steps is the creation of the dashboard linke
 1. [Overview](#overview)
 2. [How to Run](#how-to-run)
 3. [Different views](#different-views)
-   - [1. CEO](#1-ceo)
-   - [2. Real Estate Agent](#2-real-estate-agent)
+   - [1. Number of books in each category](#1-number-of-books-in-each-category)
+   - [2. Average rating for each category](#2-average-rating-for-each-category)
+   - [3. List of books available](#3-list-of-books-available)
+   - [4. List of best books](#4-list-of-best-books)
+   - [5. Search in title](#5-search-in-title)
 4. [Notes](#notes)
 
 ***
@@ -77,7 +80,7 @@ You will access to the main dashboard page with
   - `rating average`
 - **Success Response**: graph with number of books per categories selected.
 
-### 3. List of books available (more than 10 in stocks)
+### 3. List of books available
 - **URL**: `http://127.0.0.1:8050/`
 - **Method**: Dash .find in mongo DB Bibliometrics
 - **DropDown** : Values are all categories in bibliometrics. Selections can be multiple default value is 'all' (all catgories in bibliometrics)
@@ -85,12 +88,22 @@ You will access to the main dashboard page with
 "available_books = list(collection.find({"available_stock": {"$gt": 10}, "category": {'$in': categories_filtered}}, {'_id': 0}))"
 - **Success Response**: table with a list of book, category, price and rating.
 
-### 4. List of books rated by more than 3
+### 4. List of best books
 - **URL**: `http://127.0.0.1:8050/`
 - **Method**: Dash .find in mongo DB Bibliometrics
 - **DropDown** : Values are all categories in bibliometrics. Selections can be multiple default value is 'all' (all catgories in bibliometrics)
 - **Params**: 
 "best_rated_books = list(collection.find({"rating": {"$gt": 4}, "category": {'$in': categories_filtered}}, {'_id': 0}))"
+
+- **Success Response**: table with a list of book, category rating and cover books available
+
+### 5. Search in title
+- **URL**: `http://127.0.0.1:8050/`
+- **Method**: Dash .find in mongo DB Bibliometrics
+- **DropDown** : Values are all categories in bibliometrics. Selections can be multiple default value is 'all' (all catgories in bibliometrics)
+- **Params**: 
+ regex_pattern = r"(?=.*{})".format(")(?=.*".join(map(re.escape, search_words)))
+books_list = list(collection.find({"title": {"$regex": regex_pattern, "$options": "i"}}, {'category': 1, 'title': 1, 'rating': 1, 'price': 1, '_id': 0}))
 - **Success Response**: table with a list of book, category and rating
 
 
