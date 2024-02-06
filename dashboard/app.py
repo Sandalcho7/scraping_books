@@ -59,7 +59,7 @@ app.layout = html.Div([
     ], className='header'),
     
     html.Div([
-        html.H2("Number of books in each category"),
+        html.H2("📚 Number of books in each category"),
         html.Div([
             dcc.Dropdown(
                 id='category-dropdown-count',
@@ -75,7 +75,7 @@ app.layout = html.Div([
     ], className='request-div'),
 
     html.Div([
-        html.H2("Average rating for each category"),
+        html.H2("⭐️ Average rating for each category"),
         html.Div([
             dcc.Dropdown(
                 id='category-dropdown-rating',
@@ -91,7 +91,7 @@ app.layout = html.Div([
     ], className='request-div'),
 
     html.Div([
-        html.H2("List of books with more than 10 available"),
+        html.H2("💹 List of books with more than 10 available"),
         html.Div([
             dcc.Dropdown(
                 id='category-dropdown-table',
@@ -133,7 +133,7 @@ app.layout = html.Div([
     ], className='request-div'),
     
     html.Div([
-        html.H2("List of books with a 5 stars rating"),
+        html.H2("🥇 List of books with a 5 stars rating"),
         html.Div([
             dcc.Dropdown(
                 id='category-dropdown-table-rating',
@@ -174,7 +174,7 @@ app.layout = html.Div([
     ], className='request-div'),
 
     html.Div([
-        html.H2("10 best priced books with 5 stars rating"),
+        html.H2("🏆 10 best priced books with 5 stars rating"),
         html.Div([
             dash_table.DataTable(
                 id='table-rating-price',
@@ -208,14 +208,14 @@ app.layout = html.Div([
     ], className='request-div'),
 
     html.Div([
-        html.H2("Books count per rating"),
+        html.H2("🥧 Books count per rating"),
         html.Div([
             dcc.Graph(id='rating-pie-chart'),
         ])
     ], className='request-div'),
 
     html.Div([
-        html.H2("Search in title"),
+        html.H2("🔍 Search in title"),
         html.Div([
              dcc.Input(
                  id='search-text', 
