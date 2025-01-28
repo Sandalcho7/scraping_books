@@ -32,7 +32,8 @@ echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb
 Dans cette ligne de commande, remplacez `focal` par :
 - `bionic` si vous utilisez Ubuntu 18.04
 - `focal` pour Ubuntu 20.04
-- `jammy` pour Ubuntu 22.04
+- `jammy` pour Ubuntu 22.04<br>
+
 La commande ci-dessous vous permettra de connaître version Ubuntu que vous utilisez.
  ```bash
  lsb_release -a
