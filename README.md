@@ -1,123 +1,86 @@
-# BIBLIOMETRICS / DAHSBOARD WITH MONGO DB
+# Introduction au scraping et création d'une interface
 
-Coding in python and link to a scraped data base in Mongo DB.
-First steps is scrapping and second steps is the creation of the dashboard linked with mongoDB.
+## Contexte
+Dans le cadre de ma formation de développeur en IA, exercice de scraping d'un site internet et l'exposition des données récoltées via un tableau de bord.
 
-***
+## Outils
+- `Scrapy` pour le scraping des données
+- `MongoDB` pour le stockage des données
+- `Dash` pour le développement de l'interface
 
-# Table of Contents
-1. [Overview](#overview)
-2. [How to Run](#how-to-run)
-3. [Different views](#different-views)
-   - [1. Number of books in each category](#1-number-of-books-in-each-category)
-   - [2. Average rating for each category](#2-average-rating-for-each-category)
-   - [3. List of books available](#3-list-of-books-available)
-   - [4. List of best books](#4-list-of-best-books)
-   - [5. Search in title](#5-search-in-title)
-4. [Notes](#notes)
-
-***
-
-## Overview
-As a data analyst we have been asked to create an innovating project with AI and data analysis.
-With scrapping tool we had to extract strategic datas on a website : https://books.toscrape.com/ and create a dashboard to get the intersting datas such as :
-  Number of books per categoy
-  Average rating for each categories
-  List of books available (more than 10 instocks)
-
-## How to Run
-- run in python 3.11
-- Ensure you have to pip install requirements.txt (Scrapy / pymongo 3.12.0)
-- download : Mongo DB following this instruction list
-
-INSTALL MONGO DB
-********
-download mongodb 
-with last version for linux
- https://www.mongodb.com/try/download/community
-implement download in you linux environment
-in your terminal open the repository where the mongodb download is done :
-User-PC-PF1MSF5J:~$ tar -zxvf mongodb-linux-x86_64-ubuntu2204-7.0.5.tgz
-User-PC-PF1MSF5J:~$ sudo mv mongodb-linux-x86_64-ubuntu2204-7.0.5 /usr/local/mongodb
-User-PC-PF1MSF5J:~$ sudo mkdir -p /data/db
-User-PC-PF1MSF5J:~$ sudo chown -R $USER /data/db
-User-PC-PF1MSF5J:~$ cd /usr/local/mongodb/bin
-User-PC-PF1MSF5J:/usr/local/mongodb/bin$ ./mongod
-DOWNLOAD MONGODB COMPASS
-you can implement it in a Windows Environment to ensure interface with internet.
-https://www.mongodb.com/try/download/compass
-****** 
-/!\ our database name is "bibliometrics" : ensure you have no database with the same name in MongoDB
-1. Run mongo db before running your code
-2. Open compass_mongoDB and make sure you are connected and with no database named bibliometrics
-3. Run the file named : spider.py in 'scraper' with 'python3 spider.py' 
-3. Run the file named : app.py in 'dashboard' with 'python3 app.py'
-
-***
-
-## Different views
-
-app = dash.Dash()
-app.run_server(debug=True)
-
-You will access to the main dashboard page with
-`http://127.0.0.1:8050/`
-
-***
-### 1. Number of books in each category
-- **URL**: `http://127.0.0.1:8050/`
-- **Method**: Dash .find in mongo DB Bibliometrics
-- **DropDown** : Values are all categories in bibliometrics. Selections can be multiple default value is 'all' (all catgories in bibliometrics)
-- **Params**: 
-  - `book.count`
-- **Success Response**: graph with number of books per categories selected.
-
-### 2. Average rating for each category
-- **URL**: `http://127.0.0.1:8050/`
-- **Method**: Dash .find in mongo DB Bibliometrics
-- **DropDown** : Values are all categories in bibliometrics. Selections can be multiple default value is 'all' (all catgories in bibliometrics)
-- **Params**: 
-  - `rating average`
-- **Success Response**: graph with number of books per categories selected.
-
-### 3. List of books available
-- **URL**: `http://127.0.0.1:8050/`
-- **Method**: Dash .find in mongo DB Bibliometrics
-- **DropDown** : Values are all categories in bibliometrics. Selections can be multiple default value is 'all' (all catgories in bibliometrics)
-- **Params**: 
-"available_books = list(collection.find({"available_stock": {"$gt": 10}, "category": {'$in': categories_filtered}}, {'_id': 0}))"
-- **Success Response**: table with a list of book, category, price and rating.
-
-### 4. List of best books
-- **URL**: `http://127.0.0.1:8050/`
-- **Method**: Dash .find in mongo DB Bibliometrics
-- **DropDown** : Values are all categories in bibliometrics. Selections can be multiple default value is 'all' (all catgories in bibliometrics)
-- **Params**: 
-"best_rated_books = list(collection.find({"rating": {"$gt": 4}, "category": {'$in': categories_filtered}}, {'_id': 0}))"
-
-- **Success Response**: table with a list of book, category rating and cover books available
-
-### 5. Search in title
-- **URL**: `http://127.0.0.1:8050/`
-- **Method**: Dash .find in mongo DB Bibliometrics
-- **DropDown** : Values are all categories in bibliometrics. Selections can be multiple default value is 'all' (all catgories in bibliometrics)
-- **Params**: 
- regex_pattern = r"(?=.*{})".format(")(?=.*".join(map(re.escape, search_words)))
-books_list = list(collection.find({"title": {"$regex": regex_pattern, "$options": "i"}}, {'category': 1, 'title': 1, 'rating': 1, 'price': 1, '_id': 0}))
-- **Success Response**: table with a list of book, category and rating
-
-
-## Notes
-
-- this is a collaborative work with common work on all the steps of the project.
-Merge, commits were made live and in a cooperative environment.
-
+## Prérequis
+Avant de démarrer le développement le projet, il est nécessaire d'installer certaines dépendances sur l'environnement de travail. Pour effectuer ces installations, vous pouvez éxécuter la commande suivante :
+```bash
+pip install -r requirements.txt
 ```
-## Usage
+L'installation de MongoDB fait aussi partie des prérequis pour le bon fonctionnement du projet. Vous trouverez ci-dessous la procédure d'installation sur WSL.
 
-internal usage only. for training only
+### Installation de MongoDB
+1 / Mise à jour du système
+```bash
+sudo apt update
+sudo apt upgrade -y
+```
+2 / Import de la clé GPG MongoDB
+```bash
+wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | sudo apt-key add -
+```
+3 / Création du repo MongoDB
+```bash
+echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
+```
+Dans cette ligne de commande, remplacez `focal` par :
+- `bionic` si vous utilisez Ubuntu 18.04
+- `focal` pour Ubuntu 20.04
+- `jammy` pour Ubuntu 22.04
+La commande ci-dessous vous permettra de connaître version Ubuntu que vous utilisez.
+ ```bash
+ lsb_release -a
+```
+4 / Mise à jour de la liste de packages
+```bash
+sudo apt update
+```
+5 / Installation de MongoDB
+```bash
+sudo apt install -y mongodb-org
+```
+6 / Démarrage de MongoDB
+```bash
+sudo systemctl start mongod
 ```
 
-Contributing
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
-Please make sure to update tests as appropriate.
+### Installation de MongoDB Compass (GUI)
+Si vous souhaitez visualiser graphiquement votre base MongoDB, vous pouvez utiliser Compass. L'outil est téléchargeable [ici](https://www.mongodb.com/try/download/compass).
+
+## Structure du projet
+```bash
+project/
+│
+├── src/
+│   ├── assets/
+│   │   └── style.css         # Feuille de style pour l'interface Dash
+│   │
+│   ├── functions/
+│   │   ├── database.py       # Fonctions de recherche dans la base MongoDB
+│   │   └── graph.py          # Fonctions de créations de graphiques
+│   │
+│   ├── scripts/
+│   │   └── scraping.py       # Script de scraping du site internet
+│   │
+│   └── app.py                # Script du dashboard
+│
+├── .gitignore
+├── README.md
+└── requirements.txt          # Dépendances à installer
+```
+
+## Procédure
+Après l'installation des dépendances et de MongoDB, il reste à scraper les données du site https://books.toscrape.com/. Depuis la racine du projet :
+```bash
+python src/scripts/scraping.py
+```
+On peut alors vérifier que les données ont bien été scrapées et sont présentes dans la base MongoDB. Pour lancer l'interface, on exécute la commande suivante :
+```bash
+python src/app.py
+```
