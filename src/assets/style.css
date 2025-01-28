@@ -1,0 +1,93 @@
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600&display=swap');
+
+body {
+    font-family: 'Source Sans Pro', sans-serif;
+    background-color: #f9f9f9;
+    margin: 0;
+    padding: 0;
+}
+
+p {
+    margin-top: 0;
+}
+
+.header {
+    background-color: #1E1E1E;
+    padding: 20px;
+    border-radius: 10px 10px 0 0;
+}
+
+h1 {
+    color: #f9f9f9;
+    font-size: 2.5rem;
+    font-weight: 600;
+    margin: 0;
+    text-align: center;
+}
+
+h3 {
+    margin-top: 1rem;
+    color: #333;
+}
+
+.request-div {
+    padding: 2rem;
+    margin: 5vh auto;
+    max-width: 80%;
+    border-radius: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+}
+
+.dropdown, #search-text {
+    margin-bottom: 1rem;
+    width: 100%;
+}
+
+#table-rating-price img {
+    width: 70px;
+    border-radius: 5px;
+    object-fit: cover;
+}
+
+.dash-table-container .dash-spreadsheet-container .dash-spreadsheet-inner td div.dash-cell-value.cell-markdown,
+.dash-table-container .dash-spreadsheet-container .dash-spreadsheet-inner th div.dash-cell-value.cell-markdown {
+    text-align: center !important;
+}
+
+.generate-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+#random-book-button {
+    padding: 0.5rem 1rem;
+    background-color: #1E1E1E;
+    color: #f9f9f9;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#random-book-button:hover {
+    background-color: #333;
+}
+
+.random-book-container {
+    display: flex;
+    gap: 1rem;
+}
+
+.random-book-desc {
+    flex: 1;
+    text-align: justify;
+}
+
+.random-book-container img {
+    border-radius: 10px;
+    height: auto;
+    object-fit: cover;
+}
